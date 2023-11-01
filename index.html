@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Amena</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #000;
+      color: #fff;
+    }
+
+    #response {
+      height: 200px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Amena</h1>
+
+  <input type="text" id="prompt" placeholder="Enter a prompt...">
+  <button type="button" id="submit">Submit</button>
+
+  <div id="response"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $("#submit").click(function() {
+
+
+
+
+
+        const userInput = document.getElementById('prompt').value;
+
+// Make API request (replace 'your-model-name' with the actual model name)
+fetch('https://api-inference.huggingface.co/models/google/flan-t5-xxl', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ inputs: userInput }),
+          success: function(response) {
+            // Display the response from Amena in the #response element
+            $("#response").html(response.generated_text);
+          }
+
+})
+.then(response => response.json())
+.then(data => {
+    console.log(data);
+
+    // Display the result
+    document.getElementById('response').innerText = data[0]['generated_text'];
+
+})
+.catch(error => console.error('Error:', error));
+
+
+
+
+
+
+
+    
+        // var prompt = $("#prompt").val();
+
+        // // Make a request to the Hugging Face Hub API to get a response from Amena
+        // $.ajax({
+        //   url: "https://huggingface.co/transformers/api/generate",
+        //   type: "POST",
+        //   data: JSON.stringify({
+        //     inputs: prompt,
+        //     model: "amena"
+        //   }),
+        //   contentType: "application/json",
+        //   success: function(response) {
+        //     // Display the response from Amena in the #response element
+        //     $("#response").html(response.generated_text);
+        //   }
+        // });
+      });
+    });
+  </script>
+<script>
+    // Create a new SpeechRecognition object
+var speechRecognition = new webkitSpeechRecognition();
+
+// Start listening for speech
+speechRecognition.start();
+
+// When the user stops speaking, transcribe the speech and display it in the input field
+speechRecognition.onresult = function(event) {
+  $("#prompt").val(event.results[0][0].transcript);
+};
+
+</script>
+<script>
+    // Create a new SpeechSynthesisUtterance object
+var utterance = new SpeechSynthesisUtterance();
+
+// Set the text of the utterance to the response from Amena
+utterance.text = $("#response").html();
+
+// Speak the utterance
+speechSynthesis.speak(utterance);
+
+</script>
+</body>
+</html>
