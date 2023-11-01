@@ -1,126 +1,203 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Amena</title>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
+  <title>Chat UI</title>
+  <!-- <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script> -->
+<style>
+  body{
+    background-color:#cfcf;
+  }
+    #app {
+      background-color:white;
+  border: 1px solid #ccc;
+  border-radius:20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
+header {
+  text-align: center;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #000;
-      color: #fff;
-    }
+main {
+  height: 430px;
+  overflow-y: scroll;
+  padding: 10px;
+  
+}
 
-    #response {
-      height: 200px;
-      overflow-y: scroll;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-  </style>
+footer {
+  padding: 10px;
+}
+
+#messages {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.message {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.user {
+  text-align: left;
+}
+
+.assistant {
+  text-align: right;
+}
+
+#user-input {
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius:20px;
+}
+
+#send-button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #000;
+  border-radius:20px;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 576px) {
+  #app {
+    max-width: 100%;
+  }
+}
+.microphone-icon,.speaker-icon{
+    width:4%;
+    cursor: pointer;
+    margin-top:2%;
+}
+
+</style>
 </head>
 <body>
-  <h1>Amena</h1>
+  <div id="app">
+    <header>
+      <h1>Amena Chat</h1>
+      <i class="fas fa-microphone"></i>
 
-  <input type="text" id="prompt" placeholder="Enter a prompt...">
-  <button type="button" id="submit">Submit</button>
+     </header>
+    <main>
+      <ul id="messages"></ul>
+    </main>
+    <footer>
+      <img src="E:\nasa\chatwebapp\microphone.png" style="float:right; padding-left:20px;" alt="Microphone" class="microphone-icon">
+      <img src="E:\nasa\chatwebapp\speaker.png" style="float:right;"  class="speaker-icon" >
+      
+      <input type="text" id="user-input" placeholder="Type here...">
+      <button type="button" id="send-button">Send</button>
+    </footer>
+  </div>
 
-  <div id="response"></div>
+<script>
+    // Get the elements
+const messages = document.querySelector("#messages");
+const userInput = document.querySelector("#user-input");
+const sendButton = document.querySelector("#send-button");
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      $("#submit").click(function() {
+// Add a listener to the send button
+sendButton.addEventListener("click", () => {
+  // Get the user input
+  const message = userInput.value;
 
+  // Clear the user input
+  userInput.value = "";
 
+  // Add the user message to the chat history
+  const userMessage = document.createElement("li");
+  userMessage.classList.add("message");
+  userMessage.classList.add("user");
+  userMessage.textContent = message;
+  messages.appendChild(userMessage);
 
+  // Generate a response from the assistant
+  const response = generateResponse(message);
 
+  // Add the assistant response to the chat history
+  const assistantMessage = document.createElement("li");
+  assistantMessage.classList.add("message");
+  assistantMessage.classList.add("assistant");
+  assistantMessage.textContent = response;
+  messages.appendChild(assistantMessage);
 
-        const userInput = document.getElementById('prompt').value;
+  // Scroll to the bottom of the chat history
+  messages.scrollTo(0, messages.scrollHeight);
 
-// Make API request (replace 'your-model-name' with the actual model name)
-fetch('https://api-inference.huggingface.co/models/google/flan-t5-xxl', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ inputs: userInput }),
-          success: function(response) {
-            // Display the response from Amena in the #response element
-            $("#response").html(response.generated_text);
-          }
-
-})
-.then(response => response.json())
-.then(data => {
-    console.log(data);
-
-    // Display the result
-    document.getElementById('response').innerText = data[0]['generated_text'];
-
-})
-.catch(error => console.error('Error:', error));
-
-
-
-
-
-
-
-    
-        // var prompt = $("#prompt").val();
-
-        // // Make a request to the Hugging Face Hub API to get a response from Amena
-        // $.ajax({
-        //   url: "https://huggingface.co/transformers/api/generate",
-        //   type: "POST",
-        //   data: JSON.stringify({
-        //     inputs: prompt,
-        //     model: "amena"
-        //   }),
-        //   contentType: "application/json",
-        //   success: function(response) {
-        //     // Display the response from Amena in the #response element
-        //     $("#response").html(response.generated_text);
-        //   }
-        // });
-      });
+  document.querySelector(".speaker-icon").addEventListener("click", () => {
+  console.log("listen")
+    const text = response;
+      speakResponse(text);
     });
-  </script>
-<script>
-    // Create a new SpeechRecognition object
-var speechRecognition = new webkitSpeechRecognition();
 
-// Start listening for speech
-speechRecognition.start();
+});
 
-// When the user stops speaking, transcribe the speech and display it in the input field
-speechRecognition.onresult = function(event) {
-  $("#prompt").val(event.results[0][0].transcript);
-};
+// Generate a response from the assistant
+function generateResponse(message) {
+  // TODO: Implement the assistant logic here
 
-</script>
-<script>
+  return "Hello, world! I am sufyaan";
+
+
+}
+
+
+function speakResponse(response) {
     // Create a new SpeechSynthesisUtterance object
-var utterance = new SpeechSynthesisUtterance();
+    const utterance = new SpeechSynthesisUtterance();
+  
+    // Set the text of the utterance to the response from the assistant
+    utterance.text = response;
+  
+    // Speak the utterance
+    speechSynthesis.speak(utterance);
+  }
 
-// Set the text of the utterance to the response from Amena
-utterance.text = $("#response").html();
+  function startSpeechRecognition() {
+  // Create a new SpeechRecognition object
+  const speechRecognition = new webkitSpeechRecognition();
 
-// Speak the utterance
-speechSynthesis.speak(utterance);
+  // Start listening for speech
+  speechRecognition.start();
+  console.log("speak1")
 
-</script>
+  // When the user stops speaking, transcribe the speech and display it in the input field
+  speechRecognition.onresult = function(event) {
+    console.log("speak2")
+
+    // Get the transcribed speech
+    const transcript = event.results[0][0].transcript;
+    console.log(transcript)
+    // Display the transcript in the input field
+    document.getElementById("user-input").value = transcript;
+  };
+
+}
+
+
+  // Add a listener to the microphone icon
+  document.querySelector(".microphone-icon").addEventListener("click", () => {
+      // const text = "This is a test.";
+      // startSpeechRecognition(text);
+
+    startSpeechRecognition();
+
+    });
+
+
+
+  </script>
+  
 </body>
 </html>
